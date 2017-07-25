@@ -3,8 +3,8 @@ defmodule UdpClientServer do
   Documentation for UdpClientServer.
   """
 
-  @default_server_port 1337
-  @local_host {127, 0, 0, 1}
+  @default_server_port 8000
+  @server_addr "2001:412:abcd:2:0013:A200:4147:8C2B"
 
   def launch_server do
     launch_server(@default_server_port)
@@ -12,7 +12,7 @@ defmodule UdpClientServer do
 
   def launch_server(port) do
     IO.puts "Launching server on localhost on port #{port}"
-    server = Socket.UDP.open!(port)
+    server = Socket.UDP.open!(port, [{:version, 6}])
     serve(server)
   end
 
@@ -28,11 +28,12 @@ defmodule UdpClientServer do
   { host, port } like {{127, 0, 0, 1}, 1337}
   """
   def send_data(data, to) do
-    server = Socket.UDP.open!  # Without specifying the port, we randomize it
+    server = Socket.UDP.open!(0, [{:version, 6}])  # Without specifying the port, we randomize it
     Socket.Datagram.send!(server, data, to)
   end
 
   def send_data(data) do
-    send_data(data, {@local_host, @default_server_port})
+    addr = Socket.Address.parse(@server_addr)
+    send_data(data, {addr, @default_server_port})
   end
 end
